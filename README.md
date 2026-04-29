@@ -1,61 +1,80 @@
-# Network Traffic Monitor
+# 🌐 Network Traffic Monitor (Pro)
 
-A professional Windows-based desktop application for real-time network traffic monitoring and process control. Built with Python and PyQt6, it allows users to monitor data usage, visualize traffic patterns, and manage network access for individual processes.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![UI: PyQt6](https://img.shields.io/badge/GUI-PyQt6-green.svg)](https://pypi.org/project/PyQt6/)
 
-## 🚀 Features
+A high-performance Windows desktop application for real-time network analysis, process-level traffic monitoring, and intelligent firewall management.
 
-- **Real-time Monitoring**: Track sent and received data rates globally and per-process.
-- **Visual Analytics**: Dynamic charts showing network traffic history using Matplotlib.
-- **Process Management**: 
-  - **Block/Unblock**: Use Windows Firewall (`netsh`) to restrict network access for specific applications.
-  - **Terminate**: Close processes directly from the UI.
-- **Persistent Blocking**: Remembers blocked processes across sessions.
-- **Professional UI**: Dark-themed, responsive interface built with PyQt6.
+---
+
+## ✨ Key Features
+
+- **🚀 Real-time Analytics**: High-frequency monitoring of inbound and outbound traffic.
+- **📊 Dynamic Visualization**: Live Matplotlib charts integrated into a sleek PyQt6 dark-themed interface.
+- **🛡️ Intelligent Firewall Control**: 
+  - **Single-Click Block**: Instantly restrict network access for any process via Windows Firewall.
+  - **Auto-Sync Engine**: Two-way synchronization between local registry and OS firewall rules.
+  - **Orphan Cleanup**: Automatically identifies and removes "ghost" firewall rules.
+- **⚙️ Process Management**: Terminate unresponsive or bandwidth-heavy apps directly from the dashboard.
+- **📝 Persistent State**: Remembers your security configurations across system reboots.
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Python 3.10+**
-- **PyQt6**: Core GUI framework.
-- **psutil**: For retrieving network and system process information.
-- **Matplotlib**: For real-time traffic visualization.
-- **Windows Firewall (netsh)**: For application-level network blocking.
+| Component | Technology |
+| :--- | :--- |
+| **Language** | Python 3.10+ |
+| **GUI Framework** | PyQt6 (Professional Edition) |
+| **System Info** | psutil |
+| **Data Viz** | Matplotlib (Qt6 Backend) |
+| **Security Layer** | Windows Advanced Firewall (netsh) |
 
-## 📦 Installation
+---
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/Valijon21/net_monitoring.git
-   cd net_monitoring
-   ```
+## 🚀 Installation & Setup
 
-2. **Run the setup script**:
-   The easiest way is to run the provided batch file:
-   ```bash
-   run.bat
-   ```
-   *Note: This script will create a virtual environment, install dependencies, and start the application.*
+### Automated (Recommended)
+Simply run the included batch file to set up the environment and launch:
+```powershell
+.\run.bat
+```
 
-3. **Manual Setup**:
+### Manual Installation
+1. **Prepare Environment**:
    ```bash
    python -m venv venv
-   source venv/Scripts/activate  # On Windows
+   .\venv\Scripts\activate
+   ```
+2. **Install Dependencies**:
+   ```bash
    pip install -r requirements.txt
+   ```
+3. **Launch Application**:
+   ```bash
    python main.py
    ```
 
-## ⚠️ Requirements
+> [!IMPORTANT]
+> **Administrative Privileges** are required for the Blocking/Unblocking features to interact with the Windows Firewall.
 
-- **Admin Privileges**: Required for blocking/unblocking processes via the Windows Firewall.
-- **Windows OS**: The blocking feature specifically utilizes Windows-native commands.
+---
 
-## 📂 Project Structure
+## 📂 Architecture Overview
 
-- `main.py`: Entry point for the application.
-- `network_monitor.py`: Core logic for data extraction and firewall management.
-- `ui.py`: PyQt6 UI implementation and chart rendering.
-- `utils.py`: Helper functions (logging, admin check, formatting).
-- `config.py`: Global configuration parameters.
+- `main.py`: Application entry point and initialization logic.
+- `network_monitor.py`: Core logic for packet statistics and firewall synchronization.
+- `ui.py`: Custom-styled PyQt6 dashboard and charting engine.
+- `config.py`: Configuration management (intervals, logging, etc).
+- `blocked_processes.json`: Encrypted/structured local state for persistent security.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to open issues or submit pull requests to improve performance or add new features.
 
 ## 📝 License
 
-This project is open-source and available under the MIT License.
+Distributed under the **MIT License**. See `LICENSE` for more information.
