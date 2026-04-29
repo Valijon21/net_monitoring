@@ -3,7 +3,9 @@ import os
 import logging
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QTableWidget, QTableWidgetItem, 
-                             QPushButton, QLabel, QHeaderView, QLineEdit, QMessageBox)
+                             QPushButton, QLabel, QHeaderView, QLineEdit, QMessageBox,
+                             QSystemTrayIcon, QMenu)
+from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import QTimer, Qt, pyqtSignal, QThread
 from network_monitor import NetworkMonitor
 from config import APP_NAME, REFRESH_INTERVAL
