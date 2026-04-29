@@ -107,7 +107,9 @@ class NetworkMonitor:
         if os.path.exists(self.blocked_file):
             try:
                 with open(self.blocked_file, 'r') as f:
-                    return json.load(f)
+                    content = f.read().strip()
+                    if content:
+                        return json.loads(content)
             except Exception as e:
                 logging.error(f"Failed to load blocked processes: {e}")
         return {}
@@ -116,72 +118,121 @@ class NetworkMonitor:
         try:
             with open(self.blocked_file, 'w') as f:
                 json.dump(self.blocked_processes, f, indent=4)
-            logging.debug(f"Saved blocked processes to {self.blocked_file}")
+            logging.debug(f"Saved blocked processes state to {self.blocked_file}")
         except Exception as e:
             logging.error(f"Failed to save blocked processes: {e}")
 
     def _sync_with_firewall(self):
-        # Optional: verify if rules in JSON still exist in Firewall
-        # and if Firewall has rules not in JSON
-        logging.info("Syncing with Windows Firewall rules...")
+        """
+        Professional two-way sync between JSON state and Windows Firewall.
+        1. Removes 'ghost' rules from Firewall that aren't in JSON.
+        2. Restores missing rules in Firewall that are in JSON.
+        """
+        if not is_admin():
+            logging.warning("Skipping firewall sync: Admin privileges required")
+            return
+
+        logging.info("Starting professional Firewall-State synchronization...")
+        
+        # 1. Get all firewall rules created by this app
         try:
-            output = subprocess.check_output('netsh advfirewall firewall show rule name=all', shell=True).decode('cp1252', errors='ignore')
-            # Look for rules starting with Block- or NetMonitor-
-            # Actually, let's stick to our JSON as source of truth for now but clean up
-            pass
-        except:
-            pass
+            # We use CP437 or CP1252 for Windows terminal output usually
+            output = subprocess.check_output(
+                'netsh advfirewall firewall show rule name=all', 
+                shell=True, 
+                stderr=subprocess.STDOUT
+            ).decode('cp1252', errors='ignore')
+            
+            existing_firewall_rules = []
+            for line in output.splitlines():
+                if "Rule Name:" in line and "NetMonitor_Block_" in line:
+                    rule_name = line.split("Rule Name:")[1].strip()
+                    existing_firewall_rules.append(rule_name)
+                    
+            logging.debug(f"Found {len(existing_firewall_rules)} existing NetMonitor rules in Firewall")
+        except Exception as e:
+            logging.error(f"Failed to query firewall rules: {e}")
+            existing_firewall_rules = []
+
+        # 2. Identify rules to cleanup (In Firewall but NOT in JSON)
+        json_rule_names = {info['rule_name'] for info in self.blocked_processes.values()}
+        for fw_rule in existing_firewall_rules:
+            if fw_rule not in json_rule_names:
+                logging.info(f"Sync Cleanup: Removing orphaned firewall rule {fw_rule}")
+                subprocess.run(f'netsh advfirewall firewall delete rule name="{fw_rule}"', shell=True, capture_output=True)
+
+        # 3. Identify rules to restore (In JSON but NOT in Firewall)
+        firewall_rule_set = set(existing_firewall_rules)
+        for exe_path, info in self.blocked_processes.items():
+            if info['rule_name'] not in firewall_rule_set:
+                logging.info(f"Sync Restore: Re-applying missing firewall rule for {info['name']}")
+                cmd = f'netsh advfirewall firewall add rule name="{info["rule_name"]}" dir=out action=block program="{exe_path}" enable=yes'
+                subprocess.run(cmd, shell=True, capture_output=True)
+
+        logging.info("Firewall synchronization complete")
 
     def block_process(self, pid):
         try:
             proc = psutil.Process(pid)
             exe_path = proc.exe()
             name = proc.name()
+            
+            # Use exe_path as unique key to prevent duplicates if name is same
+            if exe_path in self.blocked_processes:
+                logging.info(f"Process {name} is already documented as blocked")
+                return True
+
             rule_name = f"NetMonitor_Block_{name}"
-            # netsh command to block outbound traffic for this exe
             cmd = f'netsh advfirewall firewall add rule name="{rule_name}" dir=out action=block program="{exe_path}" enable=yes'
+            
             if is_admin():
-                 subprocess.run(cmd, shell=True, check=True)
-                 self.blocked_processes[exe_path] = {'name': name, 'rule_name': rule_name}
-                 self._save_blocked()
-                 logging.info(f"Blocked process {name} via netsh (Rule: {rule_name})")
-                 return True
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                if result.returncode == 0:
+                    self.blocked_processes[exe_path] = {'name': name, 'rule_name': rule_name}
+                    self._save_blocked()
+                    logging.info(f"Successfully blocked {name} (Path: {exe_path})")
+                    return True
+                else:
+                    logging.error(f"Firewall command failed: {result.stderr}")
+                    return False
             else:
-                 logging.warning(f"Admin privileges required to block {name}")
-                 return False
+                logging.warning(f"Admin privileges required to block {name}")
+                return False
         except Exception as e:
-            logging.error(f"Failed to block process {pid}: {e}")
+            logging.error(f"Exception during block_process for PID {pid}: {e}")
             return False
 
     def unblock_process(self, pid):
+        """Unblock a process by its PID (if it's currently running)"""
         try:
-            # Find the exe_path for this PID
             proc = psutil.Process(pid)
             exe_path = proc.exe()
             return self.unblock_by_exe(exe_path)
         except Exception as e:
-            logging.debug(f"Process {pid} not found for unblocking, trying fallback unblock")
-            # If PID is gone, we might still have it in self.blocked_processes
-            # But we don't know which exe_path it was from just the PID if it's gone
+            logging.debug(f"PID {pid} not found/accessible for unblocking: {e}")
             return False
 
     def unblock_by_exe(self, exe_path):
+        """Unblock a process by its full executable path (works even if not running)"""
         try:
             if exe_path in self.blocked_processes:
                 info = self.blocked_processes[exe_path]
                 rule_name = info['rule_name']
                 cmd = f'netsh advfirewall firewall delete rule name="{rule_name}"'
+                
                 if is_admin():
-                    subprocess.run(cmd, shell=True, check=True)
+                    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                    # result.returncode 0 means success, but sometimes it says "No rules found" which returns non-zero
+                    # We remove from JSON regardless if the user wants it unblocked
                     del self.blocked_processes[exe_path]
                     self._save_blocked()
-                    logging.info(f"Unblocked process {exe_path} (Rule: {rule_name})")
+                    logging.info(f"Unblocked {exe_path} and removed from registry")
                     return True
                 else:
                     logging.warning(f"Admin privileges required to unblock {exe_path}")
             return False
         except Exception as e:
-            logging.error(f"Failed to unblock process by exe {exe_path}: {e}")
+            logging.error(f"Exception during unblock_by_exe for {exe_path}: {e}")
             return False
 
     def unblock_all(self):
