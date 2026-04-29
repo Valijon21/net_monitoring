@@ -39,6 +39,27 @@ class ChartCanvas(FigureCanvas):
         self.axes.set_ylim(bottom=0)
         self.draw()
 
+class DataWorker(QThread):
+    data_received = pyqtSignal(dict, list) # global_stats, process_stats
+    
+    def __init__(self, monitor):
+        super().__init__()
+        self.monitor = monitor
+        self.is_running = True
+
+    def run(self):
+        while self.is_running:
+            try:
+                g_stats = self.monitor.get_total_traffic()
+                p_stats = self.monitor.get_process_stats()
+                self.data_received.emit(g_stats, p_stats)
+            except Exception as e:
+                logging.error(f"Error in Background DataWorker: {e}")
+            self.msleep(REFRESH_INTERVAL)
+
+    def stop(self):
+        self.is_running = False
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -48,11 +69,64 @@ class MainWindow(QMainWindow):
         self.prev_total = self.monitor.get_total_traffic()
         
         self.init_ui()
+        self.init_tray()
         self.apply_styles()
         
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.refresh_stats)
-        self.timer.start(REFRESH_INTERVAL)
+        # Initialize Background Worker instead of QTimer for polling
+        self.worker = DataWorker(self.monitor)
+        self.worker.data_received.connect(self.update_ui)
+        self.worker.start()
+
+    def init_tray(self):
+        # Create Tray Icon
+        self.tray_icon = QSystemTrayIcon(self)
+        
+        # Use a default icon or a specific one if available
+        # For now, we'll try to find any icon or just use a standard one
+        icon = self.style().standardIcon(self.style().StandardPixmap.SP_ComputerIcon)
+        self.tray_icon.setIcon(icon)
+        
+        # Create Tray Menu
+        tray_menu = QMenu()
+        restore_action = QAction("Restore", self)
+        restore_action.triggered.connect(self.showNormal)
+        
+        quit_action = QAction("Quit", self)
+        quit_action.triggered.connect(self.force_quit)
+        
+        tray_menu.addAction(restore_action)
+        tray_menu.addSeparator()
+        tray_menu.addAction(quit_action)
+        
+        self.tray_icon.setContextMenu(tray_menu)
+        self.tray_icon.activated.connect(self.tray_icon_activated)
+        self.tray_icon.show()
+
+    def tray_icon_activated(self, reason):
+        if reason == QSystemTrayIcon.ActivationReason.Trigger:
+            if self.isVisible():
+                self.hide()
+            else:
+                self.showNormal()
+
+    def force_quit(self):
+        self.worker.stop()
+        self.worker.wait()
+        QApplication.quit()
+
+    def closeEvent(self, event):
+        if self.tray_icon.isVisible():
+            self.hide()
+            self.tray_icon.showMessage(
+                APP_NAME,
+                "Application is still running in the tray.",
+                QSystemTrayIcon.MessageIcon.Information,
+                2000
+            )
+            event.ignore()
+        else:
+            self.force_quit()
+            event.accept()
 
     def init_ui(self):
         main_widget = QWidget()
@@ -114,10 +188,10 @@ class MainWindow(QMainWindow):
             QPushButton#unblockBtn:hover { background-color: #218838; }
         """)
 
-    def refresh_stats(self):
-        logging.debug("Refreshing UI stats")
-        # Global stats
-        curr_total = self.monitor.get_total_traffic()
+    def update_ui(self, curr_total, process_stats):
+        logging.debug("Updating UI from background worker signals")
+        
+        # Global stats calculation
         sent_speed = (curr_total['sent'] - self.prev_total['sent']) / (REFRESH_INTERVAL / 1000)
         recv_speed = (curr_total['recv'] - self.prev_total['recv']) / (REFRESH_INTERVAL / 1000)
         self.prev_total = curr_total
@@ -126,23 +200,18 @@ class MainWindow(QMainWindow):
         self.canvas.update_data(sent_speed/1024, recv_speed/1024)
         
         # Per-process stats
-        stats = self.monitor.get_process_stats()
-        
-        # Mapping for quick lookup
+        stats = process_stats
         current_pids = {s['pid']: s for s in stats}
         
-        # Update existing rows and identify rows to remove
         rows_to_remove = []
         for i in range(self.table.rowCount()):
             pid_item = self.table.item(i, 0)
             if pid_item:
                 pid = int(pid_item.text())
                 if pid in current_pids:
-                    # Update speed
                     s = current_pids[pid]
                     self.table.item(i, 2).setText(s['formatted_speed'])
                     
-                    # Update Block/Unblock button if status changed
                     is_blocked = s.get('is_blocked', False)
                     block_btn = self.table.cellWidget(i, 4)
                     if isinstance(block_btn, QPushButton):
@@ -150,33 +219,23 @@ class MainWindow(QMainWindow):
                         if block_btn.text() != expected_text:
                             block_btn.setText(expected_text)
                             block_btn.setObjectName("unblockBtn" if is_blocked else "blockBtn")
-                            # Re-apply style to reflect name change
-                            block_btn.setStyleSheet("") # Clear local if any
-                            self.apply_styles() # Re-apply global stylesheet to pick up new object name style
-                            
-                            # Re-connect Signal with new state
+                            self.apply_styles()
                             block_btn.clicked.disconnect()
                             block_btn.clicked.connect(lambda checked, p=pid, b=is_blocked: self.handle_block(p, b))
 
-                    # Remove from current_pids as it's already handled
                     del current_pids[pid]
                 else:
-                    # Mark for removal
                     rows_to_remove.append(i)
         
-        # Remove old rows (in reverse to maintain indices)
         for row in sorted(rows_to_remove, reverse=True):
             self.table.removeRow(row)
             
-        # Add new rows
         for pid, s in current_pids.items():
             i = self.table.rowCount()
             self.table.insertRow(i)
             self.table.setItem(i, 0, QTableWidgetItem(str(s['pid'])))
             self.table.setItem(i, 1, QTableWidgetItem(s['name']))
-            
-            speed_text = s['formatted_speed']
-            self.table.setItem(i, 2, QTableWidgetItem(speed_text))
+            self.table.setItem(i, 2, QTableWidgetItem(s['formatted_speed']))
             
             term_btn = QPushButton("End Process")
             term_btn.clicked.connect(lambda checked, p=s['pid']: self.handle_terminate(p))
@@ -192,32 +251,27 @@ class MainWindow(QMainWindow):
     def handle_terminate(self, pid):
         logging.info(f"User requested termination of process {pid}")
         if self.monitor.terminate_process(pid):
-            logging.info(f"Successfully terminated process {pid}")
             self.status_label.setText(f"Terminated process {pid}")
         else:
-            logging.error(f"Failed to terminate process {pid}")
             QMessageBox.warning(self, "Error", f"Failed to terminate process {pid}")
 
     def handle_block(self, pid, already_blocked=False):
         if already_blocked:
-            logging.info(f"User requested unblocking of process {pid}")
             if self.monitor.unblock_process(pid):
-                logging.info(f"Successfully unblocked process {pid}")
                 self.status_label.setText(f"Unblocked process {pid}")
-                self.refresh_stats() # Immediate UI update
             else:
-                logging.error(f"Failed to unblock process {pid}")
-                QMessageBox.warning(self, "Error", "Failed to unblock process. Ensure you have Admin privileges.")
+                QMessageBox.warning(self, "Error", "Failed to unblock. Ensure Admin privileges.")
         else:
-            logging.info(f"User requested blocking of process {pid}")
             if self.monitor.block_process(pid):
-                logging.info(f"Successfully blocked process {pid}")
                 self.status_label.setText(f"Blocked process {pid}")
-                self.refresh_stats() # Immediate UI update
                 QMessageBox.information(self, "Success", f"Process {pid} blocked via Firewall.")
             else:
-                logging.error(f"Failed to block process {pid}")
-                QMessageBox.warning(self, "Error", "Failed to block process. Check Admin privileges.")
+                QMessageBox.warning(self, "Error", "Failed to block. Check Admin privileges.")
+
+    def closeEvent(self, event):
+        self.worker.stop()
+        self.worker.wait()
+        event.accept()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

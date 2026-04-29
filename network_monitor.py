@@ -136,12 +136,15 @@ class NetworkMonitor:
         
         # 1. Get all firewall rules created by this app
         try:
-            # We use CP437 or CP1252 for Windows terminal output usually
-            output = subprocess.check_output(
-                'netsh advfirewall firewall show rule name=all', 
-                shell=True, 
-                stderr=subprocess.STDOUT
-            ).decode('cp1252', errors='ignore')
+            # We use CP1252 for Windows terminal output usually
+            result = subprocess.run(
+                ['netsh', 'advfirewall', 'firewall', 'show', 'rule', 'name=all'],
+                capture_output=True,
+                text=True,
+                encoding='cp1252',
+                errors='ignore'
+            )
+            output = result.stdout
             
             existing_firewall_rules = []
             for line in output.splitlines():
@@ -159,15 +162,19 @@ class NetworkMonitor:
         for fw_rule in existing_firewall_rules:
             if fw_rule not in json_rule_names:
                 logging.info(f"Sync Cleanup: Removing orphaned firewall rule {fw_rule}")
-                subprocess.run(f'netsh advfirewall firewall delete rule name="{fw_rule}"', shell=True, capture_output=True)
+                subprocess.run(['netsh', 'advfirewall', 'firewall', 'delete', 'rule', f'name={fw_rule}'], capture_output=True)
 
         # 3. Identify rules to restore (In JSON but NOT in Firewall)
         firewall_rule_set = set(existing_firewall_rules)
         for exe_path, info in self.blocked_processes.items():
             if info['rule_name'] not in firewall_rule_set:
                 logging.info(f"Sync Restore: Re-applying missing firewall rule for {info['name']}")
-                cmd = f'netsh advfirewall firewall add rule name="{info["rule_name"]}" dir=out action=block program="{exe_path}" enable=yes'
-                subprocess.run(cmd, shell=True, capture_output=True)
+                cmd = [
+                    'netsh', 'advfirewall', 'firewall', 'add', 'rule',
+                    f'name={info["rule_name"]}', 'dir=out', 'action=block',
+                    f'program={exe_path}', 'enable=yes'
+                ]
+                subprocess.run(cmd, capture_output=True)
 
         logging.info("Firewall synchronization complete")
 
@@ -177,16 +184,19 @@ class NetworkMonitor:
             exe_path = proc.exe()
             name = proc.name()
             
-            # Use exe_path as unique key to prevent duplicates if name is same
             if exe_path in self.blocked_processes:
                 logging.info(f"Process {name} is already documented as blocked")
                 return True
 
             rule_name = f"NetMonitor_Block_{name}"
-            cmd = f'netsh advfirewall firewall add rule name="{rule_name}" dir=out action=block program="{exe_path}" enable=yes'
+            cmd = [
+                'netsh', 'advfirewall', 'firewall', 'add', 'rule',
+                f'name={rule_name}', 'dir=out', 'action=block',
+                f'program={exe_path}', 'enable=yes'
+            ]
             
             if is_admin():
-                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                result = subprocess.run(cmd, capture_output=True, text=True, encoding='cp1252')
                 if result.returncode == 0:
                     self.blocked_processes[exe_path] = {'name': name, 'rule_name': rule_name}
                     self._save_blocked()
@@ -218,12 +228,10 @@ class NetworkMonitor:
             if exe_path in self.blocked_processes:
                 info = self.blocked_processes[exe_path]
                 rule_name = info['rule_name']
-                cmd = f'netsh advfirewall firewall delete rule name="{rule_name}"'
+                cmd = ['netsh', 'advfirewall', 'firewall', 'delete', 'rule', f'name={rule_name}']
                 
                 if is_admin():
-                    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-                    # result.returncode 0 means success, but sometimes it says "No rules found" which returns non-zero
-                    # We remove from JSON regardless if the user wants it unblocked
+                    subprocess.run(cmd, capture_output=True)
                     del self.blocked_processes[exe_path]
                     self._save_blocked()
                     logging.info(f"Unblocked {exe_path} and removed from registry")
