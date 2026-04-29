@@ -10,13 +10,15 @@ A high-performance Windows desktop application for real-time network analysis, p
 
 ## ✨ Key Features
 
-- **🚀 Real-time Analytics**: High-frequency monitoring of inbound and outbound traffic.
+- **🚀 Real-time Analytics**: High-frequency monitoring of inbound and outbound traffic with **Asynchronous Multithreading** for zero UI lag.
 - **📊 Dynamic Visualization**: Live Matplotlib charts integrated into a sleek PyQt6 dark-themed interface.
 - **🛡️ Intelligent Firewall Control**: 
   - **Single-Click Block**: Instantly restrict network access for any process via Windows Firewall.
   - **Auto-Sync Engine**: Two-way synchronization between local registry and OS firewall rules.
   - **Orphan Cleanup**: Automatically identifies and removes "ghost" firewall rules.
+- **📥 System Tray Background Execution**: Minimize to tray to keep the monitor running silently in the background.
 - **⚙️ Process Management**: Terminate unresponsive or bandwidth-heavy apps directly from the dashboard.
+- **🧪 Automated Stability**: Built-in unit testing suite using `pytest` to ensure core logical integrity.
 - **📝 Persistent State**: Remembers your security configurations across system reboots.
 
 ---
@@ -26,10 +28,11 @@ A high-performance Windows desktop application for real-time network analysis, p
 | Component | Technology |
 | :--- | :--- |
 | **Language** | Python 3.10+ |
-| **GUI Framework** | PyQt6 (Professional Edition) |
+| **GUI Framework** | PyQt6 (with QThread & QSystemTrayIcon) |
 | **System Info** | psutil |
 | **Data Viz** | Matplotlib (Qt6 Backend) |
-| **Security Layer** | Windows Advanced Firewall (netsh) |
+| **Testing** | pytest |
+| **Security Layer** | Windows Advanced Firewall (Safe netsh execution) |
 
 ---
 
