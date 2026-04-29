@@ -1,0 +1,137 @@
+2026-04-27 04:14:35,922 - root - INFO - Logging system initialized (Professional Mode)
+2026-04-27 04:14:35,922 - root - INFO - --- Starting Application Initializing Sequence ---
+2026-04-27 04:14:35,922 - root - INFO - Importing GUI modules...
+2026-04-27 04:14:35,923 - root - CRITICAL - CRITICAL ERROR: Missing dependencies! No module named 'PyQt6'
+2026-04-27 04:14:35,926 - root - CRITICAL - Traceback (most recent call last):
+  File "C:\Users\nout.plus\Desktop\Proyekt\net_monitoring\main.py", line 12, in <module>
+    from ui import MainWindow
+  File "C:\Users\nout.plus\Desktop\Proyekt\net_monitoring\ui.py", line 4, in <module>
+    from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
+ModuleNotFoundError: No module named 'PyQt6'
+
+2026-04-27 04:25:50,160 - root - INFO - Logging system initialized (Professional Mode)
+2026-04-27 04:25:50,161 - root - INFO - --- Starting Application Initializing Sequence ---
+2026-04-27 04:25:50,161 - root - INFO - Importing GUI modules...
+2026-04-27 04:25:50,761 - root - INFO - GUI modules imported successfully
+2026-04-27 04:25:50,761 - root - INFO - Entering main execution block
+2026-04-27 04:25:50,789 - root - INFO - PyQt6 Application instance created
+2026-04-27 04:25:50,842 - root - INFO - Main Window initialized
+2026-04-27 04:25:50,940 - root - INFO - Main Window visible
+2026-04-27 04:30:42,648 - root - INFO - Logging system initialized (Professional Mode)
+2026-04-27 04:30:42,648 - root - INFO - --- Starting Application Initializing Sequence ---
+2026-04-27 04:30:42,648 - root - INFO - Importing GUI modules...
+2026-04-27 04:30:42,653 - root - CRITICAL - CRITICAL ERROR: Missing dependencies! No module named 'PyQt6'
+2026-04-27 04:30:42,655 - root - CRITICAL - Traceback (most recent call last):
+  File "c:\Users\nout.plus\Desktop\Proyekt\net_monitoring\main.py", line 12, in <module>
+    from ui import MainWindow
+  File "c:\Users\nout.plus\Desktop\Proyekt\net_monitoring\ui.py", line 4, in <module>
+    from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
+ModuleNotFoundError: No module named 'PyQt6'
+
+2026-04-27 04:31:03,208 - root - INFO - Logging system initialized (Professional Mode)
+2026-04-27 04:31:03,208 - root - INFO - --- Starting Application Initializing Sequence ---
+2026-04-27 04:31:03,209 - root - INFO - Importing GUI modules...
+2026-04-27 04:31:03,589 - root - INFO - GUI modules imported successfully
+2026-04-27 04:31:03,590 - root - INFO - Entering main execution block
+2026-04-27 04:31:03,605 - root - INFO - PyQt6 Application instance created
+2026-04-27 04:31:03,913 - root - INFO - Main Window initialized
+2026-04-27 04:31:03,991 - root - INFO - Main Window visible
+2026-04-27 04:31:28,876 - root - INFO - User requested blocking of process 20460
+2026-04-27 04:31:28,998 - root - INFO - Blocked process Telegram.exe (PID: 20460) via netsh
+2026-04-27 04:31:28,999 - root - INFO - Successfully blocked process 20460
+2026-04-27 04:32:49,153 - root - INFO - User requested termination of process 6528
+2026-04-27 04:32:49,155 - root - INFO - Terminated process 6528
+2026-04-27 04:32:49,155 - root - INFO - Successfully terminated process 6528
+2026-04-27 04:38:01,710 - root - INFO - Logging system initialized (Professional Mode)
+2026-04-27 04:38:01,710 - root - INFO - --- Starting Application Initializing Sequence ---
+2026-04-27 04:38:01,712 - root - INFO - Importing GUI modules...
+2026-04-27 04:38:02,129 - root - INFO - GUI modules imported successfully
+2026-04-27 04:38:02,129 - root - INFO - Entering main execution block
+2026-04-27 04:38:02,146 - root - INFO - PyQt6 Application instance created
+2026-04-27 04:38:02,191 - root - INFO - Main Window initialized
+2026-04-27 04:38:02,263 - root - INFO - Main Window visible
+2026-04-27 04:39:24,313 - root - INFO - Logging system initialized (Professional Mode)
+2026-04-27 04:39:24,313 - root - INFO - --- Starting Application Initializing Sequence ---
+2026-04-27 04:39:24,313 - root - INFO - Importing GUI modules...
+2026-04-27 04:39:24,315 - root - CRITICAL - CRITICAL ERROR: Missing dependencies! No module named 'PyQt6'
+2026-04-27 04:39:24,318 - root - CRITICAL - Traceback (most recent call last):
+  File "c:\Users\nout.plus\Desktop\Proyekt\net_monitoring\main.py", line 12, in <module>
+    from ui import MainWindow
+  File "c:\Users\nout.plus\Desktop\Proyekt\net_monitoring\ui.py", line 4, in <module>
+    from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
+ModuleNotFoundError: No module named 'PyQt6'
+
+2026-04-27 04:41:20,146 - root - INFO - Logging system initialized (Professional Mode)
+2026-04-27 04:41:20,147 - root - INFO - --- Starting Application Initializing Sequence ---
+2026-04-27 04:41:20,147 - root - INFO - Importing GUI modules...
+2026-04-27 04:41:20,149 - root - CRITICAL - CRITICAL ERROR: Missing dependencies! No module named 'PyQt6'
+2026-04-27 04:41:20,151 - root - CRITICAL - Traceback (most recent call last):
+  File "c:\Users\nout.plus\Desktop\Proyekt\net_monitoring\main.py", line 12, in <module>
+    from ui import MainWindow
+  File "c:\Users\nout.plus\Desktop\Proyekt\net_monitoring\ui.py", line 4, in <module>
+    from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
+ModuleNotFoundError: No module named 'PyQt6'
+
+2026-04-27 04:41:47,667 - root - INFO - Logging system initialized (Professional Mode)
+2026-04-27 04:41:47,668 - root - INFO - --- Starting Application Initializing Sequence ---
+2026-04-27 04:41:47,668 - root - INFO - Importing GUI modules...
+2026-04-27 04:41:48,071 - root - INFO - GUI modules imported successfully
+2026-04-27 04:41:48,071 - root - INFO - Entering main execution block
+2026-04-27 04:41:48,088 - root - INFO - PyQt6 Application instance created
+2026-04-27 04:41:48,120 - root - INFO - Main Window initialized
+2026-04-27 04:41:48,203 - root - INFO - Main Window visible
+2026-04-27 04:46:07,827 - root - INFO - Logging system initialized (Professional Mode)
+2026-04-27 04:46:07,828 - root - INFO - --- Starting Application Initializing Sequence ---
+2026-04-27 04:46:07,828 - root - INFO - Importing GUI modules...
+2026-04-27 04:46:08,243 - root - INFO - GUI modules imported successfully
+2026-04-27 04:46:08,244 - root - INFO - Entering main execution block
+2026-04-27 04:46:08,260 - root - INFO - PyQt6 Application instance created
+2026-04-27 04:46:08,319 - root - INFO - Main Window initialized
+2026-04-27 04:46:08,387 - root - INFO - Main Window visible
+2026-04-27 04:49:31,479 - root - INFO - Logging system initialized (Professional Mode)
+2026-04-27 04:49:31,479 - root - INFO - --- Starting Application Initializing Sequence ---
+2026-04-27 04:49:31,479 - root - INFO - Importing GUI modules...
+2026-04-27 04:49:31,888 - root - INFO - GUI modules imported successfully
+2026-04-27 04:49:31,888 - root - INFO - Entering main execution block
+2026-04-27 04:49:31,906 - root - INFO - PyQt6 Application instance created
+2026-04-27 04:49:31,936 - root - INFO - Main Window initialized
+2026-04-27 04:49:32,003 - root - INFO - Main Window visible
+2026-04-27 05:15:16,965 - root - INFO - Logging system initialized (Professional Mode)
+2026-04-27 05:15:16,965 - root - INFO - --- Starting Application Initializing Sequence ---
+2026-04-27 05:15:16,965 - root - INFO - Importing GUI modules...
+2026-04-27 05:15:17,373 - root - INFO - GUI modules imported successfully
+2026-04-27 05:15:17,374 - root - INFO - Entering main execution block
+2026-04-27 05:15:17,393 - root - INFO - PyQt6 Application instance created
+2026-04-27 05:15:17,397 - root - INFO - Syncing with Windows Firewall rules...
+2026-04-27 05:15:17,720 - root - INFO - Main Window initialized
+2026-04-27 05:15:17,797 - root - INFO - Main Window visible
+2026-04-27 05:15:44,003 - root - INFO - User requested blocking of process 20460
+2026-04-27 05:15:44,071 - root - ERROR - Failed to block process 20460: 'NetworkMonitor' object has no attribute '_save_blocked'
+2026-04-27 05:15:44,071 - root - ERROR - Failed to block process 20460
+2026-04-27 05:16:44,397 - root - INFO - User requested blocking of process 20460
+2026-04-27 05:16:44,475 - root - ERROR - Failed to block process 20460: 'NetworkMonitor' object has no attribute '_save_blocked'
+2026-04-27 05:16:44,476 - root - ERROR - Failed to block process 20460
+2026-04-27 05:17:19,700 - root - INFO - User requested blocking of process 20460
+2026-04-27 05:17:19,765 - root - ERROR - Failed to block process 20460: 'NetworkMonitor' object has no attribute '_save_blocked'
+2026-04-27 05:17:19,766 - root - ERROR - Failed to block process 20460
+2026-04-27 05:17:23,888 - root - INFO - User requested termination of process 20460
+2026-04-27 05:17:23,889 - root - INFO - Terminated process 20460
+2026-04-27 05:17:23,889 - root - INFO - Successfully terminated process 20460
+2026-04-27 05:17:34,363 - root - INFO - User requested unblocking of process 6748
+2026-04-27 05:17:34,437 - root - INFO - Attempting fallback unblock for unknown PID 6748
+2026-04-27 05:17:34,438 - root - ERROR - Failed to unblock process 6748
+2026-04-29 09:44:08,648 - root - INFO - Logging system initialized (Professional Mode)
+2026-04-29 09:44:08,648 - root - INFO - --- Starting Application Initializing Sequence ---
+2026-04-29 09:44:08,648 - root - INFO - Importing GUI modules...
+2026-04-29 09:44:11,162 - root - INFO - GUI modules imported successfully
+2026-04-29 09:44:11,162 - root - INFO - Entering main execution block
+2026-04-29 09:44:11,278 - root - INFO - PyQt6 Application instance created
+2026-04-29 09:44:11,286 - root - INFO - Syncing with Windows Firewall rules...
+2026-04-29 09:44:11,571 - root - INFO - Main Window initialized
+2026-04-29 09:44:11,721 - root - INFO - Main Window visible
+2026-04-29 09:46:04,327 - root - INFO - User requested blocking of process 2856
+2026-04-29 09:46:04,393 - root - ERROR - Failed to block process 2856: 'NetworkMonitor' object has no attribute '_save_blocked'
+2026-04-29 09:46:04,395 - root - ERROR - Failed to block process 2856
+2026-04-29 09:46:26,259 - root - INFO - User requested termination of process 2856
+2026-04-29 09:46:26,259 - root - INFO - Terminated process 2856
+2026-04-29 09:46:26,260 - root - INFO - Successfully terminated process 2856
