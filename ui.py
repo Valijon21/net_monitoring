@@ -141,6 +141,23 @@ class MainWindow(QMainWindow):
                     # Update speed
                     s = current_pids[pid]
                     self.table.item(i, 2).setText(s['formatted_speed'])
+                    
+                    # Update Block/Unblock button if status changed
+                    is_blocked = s.get('is_blocked', False)
+                    block_btn = self.table.cellWidget(i, 4)
+                    if isinstance(block_btn, QPushButton):
+                        expected_text = "Unblock" if is_blocked else "Block"
+                        if block_btn.text() != expected_text:
+                            block_btn.setText(expected_text)
+                            block_btn.setObjectName("unblockBtn" if is_blocked else "blockBtn")
+                            # Re-apply style to reflect name change
+                            block_btn.setStyleSheet("") # Clear local if any
+                            self.apply_styles() # Re-apply global stylesheet to pick up new object name style
+                            
+                            # Re-connect Signal with new state
+                            block_btn.clicked.disconnect()
+                            block_btn.clicked.connect(lambda checked, p=pid, b=is_blocked: self.handle_block(p, b))
+
                     # Remove from current_pids as it's already handled
                     del current_pids[pid]
                 else:
@@ -187,14 +204,16 @@ class MainWindow(QMainWindow):
             if self.monitor.unblock_process(pid):
                 logging.info(f"Successfully unblocked process {pid}")
                 self.status_label.setText(f"Unblocked process {pid}")
+                self.refresh_stats() # Immediate UI update
             else:
                 logging.error(f"Failed to unblock process {pid}")
-                QMessageBox.warning(self, "Error", "Failed to unblock process.")
+                QMessageBox.warning(self, "Error", "Failed to unblock process. Ensure you have Admin privileges.")
         else:
             logging.info(f"User requested blocking of process {pid}")
             if self.monitor.block_process(pid):
                 logging.info(f"Successfully blocked process {pid}")
                 self.status_label.setText(f"Blocked process {pid}")
+                self.refresh_stats() # Immediate UI update
                 QMessageBox.information(self, "Success", f"Process {pid} blocked via Firewall.")
             else:
                 logging.error(f"Failed to block process {pid}")

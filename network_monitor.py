@@ -112,6 +112,14 @@ class NetworkMonitor:
                 logging.error(f"Failed to load blocked processes: {e}")
         return {}
 
+    def _save_blocked(self):
+        try:
+            with open(self.blocked_file, 'w') as f:
+                json.dump(self.blocked_processes, f, indent=4)
+            logging.debug(f"Saved blocked processes to {self.blocked_file}")
+        except Exception as e:
+            logging.error(f"Failed to save blocked processes: {e}")
+
     def _sync_with_firewall(self):
         # Optional: verify if rules in JSON still exist in Firewall
         # and if Firewall has rules not in JSON
@@ -150,7 +158,15 @@ class NetworkMonitor:
             # Find the exe_path for this PID
             proc = psutil.Process(pid)
             exe_path = proc.exe()
-            
+            return self.unblock_by_exe(exe_path)
+        except Exception as e:
+            logging.debug(f"Process {pid} not found for unblocking, trying fallback unblock")
+            # If PID is gone, we might still have it in self.blocked_processes
+            # But we don't know which exe_path it was from just the PID if it's gone
+            return False
+
+    def unblock_by_exe(self, exe_path):
+        try:
             if exe_path in self.blocked_processes:
                 info = self.blocked_processes[exe_path]
                 rule_name = info['rule_name']
@@ -161,11 +177,11 @@ class NetworkMonitor:
                     self._save_blocked()
                     logging.info(f"Unblocked process {exe_path} (Rule: {rule_name})")
                     return True
+                else:
+                    logging.warning(f"Admin privileges required to unblock {exe_path}")
             return False
         except Exception as e:
-            logging.info(f"Attempting fallback unblock for unknown PID {pid}")
-            # Fallback: if process is gone, unblock by trying all rules?
-            # Or just let them unblock by name in UI
+            logging.error(f"Failed to unblock process by exe {exe_path}: {e}")
             return False
 
     def unblock_all(self):
